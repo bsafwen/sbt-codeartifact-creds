@@ -80,11 +80,6 @@ intellijPlatform {
                 )
             }
         }
-
-        ideaVersion {
-            sinceBuild = providers.gradleProperty("pluginSinceBuild")
-            untilBuild = providers.gradleProperty("pluginUntilBuild")
-        }
     }
 
     signing {
@@ -154,4 +149,8 @@ intellijPlatformTesting {
             }
         }
     }
+}
+
+tasks.named("buildSearchableOptions") {
+    enabled = false
 }
