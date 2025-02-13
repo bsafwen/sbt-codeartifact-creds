@@ -24,6 +24,24 @@ This specific section is a source for the [plugin.xml](/src/main/resources/META-
 To keep everything working, do not remove `<!-- ... -->` sections. 
 <!-- Plugin description end -->
 
+## How it works
+For CI it is easy to pass the CodeArtifact to sbt token by exporting it. But there is no easy way
+to do the same when building from Intellij. One solution would to be launch the IDE from the shell
+that have the token exported. Another solution, which is the proposed solution in this repo, is to
+to store the token in a file, and read it in build.sbt.
+
+for example:
+```sbt
+ThisBuild / credentials ++= Seq(
+  Credentials(
+    "Repo Name",
+    "AWS CodeArtifact Endpoint: *.codeartifact.*.amazonaws.com",
+    "aws",
+    sys.env.getOrElse("CODEARTIFACT_AUTH_TOKEN", scala.io.Source.fromFile(System.getProperty("user.home") + "/.sbt/.credentials").mkString)
+  )
+)
+```
+
 ## Installation
 
 - Using the IDE built-in plugin system:
