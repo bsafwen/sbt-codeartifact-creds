@@ -16,7 +16,7 @@ import com.intellij.util.ui.UIUtil
 import java.awt.*
 import javax.swing.*
 
-class MyToolWindowFactory : ToolWindowFactory {
+class CredsGenerationUI : ToolWindowFactory {
 
     init {
         thisLogger().warn("Don't forget to remove all non-needed sample code files with their corresponding registration entries in `plugin.xml`.")
