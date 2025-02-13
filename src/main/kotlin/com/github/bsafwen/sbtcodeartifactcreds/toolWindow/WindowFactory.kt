@@ -1,14 +1,11 @@
 package com.github.bsafwen.sbtcodeartifactcreds.toolWindow
 
-import com.github.bsafwen.sbtcodeartifactcreds.SbtCodeArtifcatCredentials
 import com.github.bsafwen.sbtcodeartifactcreds.settings.CodeArtifactSettingsComponent
-import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.components.JBLabel
-import com.intellij.ui.components.JBPanel
 import com.intellij.ui.components.JBTextField
 import com.intellij.ui.content.ContentFactory
 import com.intellij.util.ui.JBUI
