@@ -1,5 +1,6 @@
 package com.github.bsafwen.sbtcodeartifactcreds.toolWindow
 
+import com.github.bsafwen.sbtcodeartifactcreds.aws.runAwsCommand
 import com.github.bsafwen.sbtcodeartifactcreds.settings.CodeArtifactSettingsComponent
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
@@ -246,8 +247,8 @@ class CodeArtifactPanel(private val project: Project) : JPanel() {
 
                     saveValues()
 
-                    val command = arrayOf(
-                        "aws",
+                    val command =
+                    runAwsCommand(
                         "codeartifact",
                         "get-authorization-token",
                         "--domain",
@@ -267,18 +268,13 @@ class CodeArtifactPanel(private val project: Project) : JPanel() {
                         credentialsDir.mkdirs()
                     }
 
-                    val process = ProcessBuilder(*command)
-                        .redirectOutput(File(credentialsDir, ".credentials"))
-                        .redirectError(ProcessBuilder.Redirect.PIPE)
-                        .start()
-
-                    val exitCode = process.waitFor()
+                    val exitCode = command.first
 
                     SwingUtilities.invokeLater {
                         if (exitCode == 0) {
                             updateStatusLabel("Token generated successfully!", AllIcons.General.InspectionsOK)
                         } else {
-                            val error = process.errorStream.bufferedReader().readText()
+                            val error = command.second
                             updateStatusLabel("Token generation failed!\n" + error, AllIcons.General.InspectionsError)
                             throw Exception("Failed to generate token: $error")
                         }
