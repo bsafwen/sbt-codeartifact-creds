@@ -6,7 +6,8 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 data class CodeArtifactSettings(
     var domain: String = "",
     var profile: String = "",
-    var region: String = ""
+    var region: String = "",
+    var awsPath: String = ""
 )
 
 @Service(Service.Level.PROJECT)

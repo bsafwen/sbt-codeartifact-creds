@@ -37,6 +37,7 @@ class CodeArtifactPanel(private val project: Project) : JPanel() {
     private val domainField = JBTextField()
     private val profileField = JBTextField()
     private val regionField = JBTextField()
+    private val awsPathField = JBTextField()
     private val generateButton = JButton("Generate Token").apply {
         putClientProperty("JButton.buttonType", "primary")
         icon = AllIcons.Toolwindows.ToolWindowRun
@@ -136,6 +137,17 @@ class CodeArtifactPanel(private val project: Project) : JPanel() {
         inputPanel.add(regionLabel, createFieldConstraints(2, 0))
         inputPanel.add(regionField, createFieldConstraints(2, 1))
 
+        // AWS Path field
+        awsPathField.apply {
+            putClientProperty("JTextField.placeholderText", "Enter the path to the AWS CLI executable")
+            document.addDocumentListener(createValidationListener())
+        }
+        val awsPathLabel = JBLabel("AWS Path:").apply {
+            icon = AllIcons.Providers.DynamoDB
+        }
+        inputPanel.add(awsPathLabel, createFieldConstraints(3, 0))
+        inputPanel.add(awsPathField, createFieldConstraints(3, 1))
+
         // Add input panel
         gbc.apply {
             gridy = 2
@@ -187,13 +199,24 @@ class CodeArtifactPanel(private val project: Project) : JPanel() {
         val html = """
         <html>
           <body>
-            <h3>Prerequisites:</h3>
-            <ul>
-              <li>AWS CLI must be installed</li>
-              <li>Valid AWS credentials configured</li>
-              <li>Necessary AWS permissions granted</li>
-            </ul>
+            <p>Note: If you are not logged in, the aws command will prompt you
+             to log in</p>
             <p>The token will be saved to ~/.sbt/.credentials</p>
+            <p>Then you need to need to reference the token in your sbt
+             build file:</p>
+            <pre>
+    Credentials(
+      "repo name",
+      "aws codeartifact endpoint",
+      "username",
+      sys.env.getOrElse("CODEARTIFACT_AUTH_TOKEN",
+       scala.io.Source.fromFile(
+        System.getProperty("user.home") +
+        "/.sbt/.credentials"
+       )
+      .mkString)
+    )
+            </pre>
           </body>
         </html>
     """.trimIndent()
@@ -226,7 +249,8 @@ class CodeArtifactPanel(private val project: Project) : JPanel() {
     private fun validateFields() {
         val isValid = domainField.text.isNotBlank() &&
                 profileField.text.isNotBlank() &&
-                regionField.text.isNotBlank()
+                regionField.text.isNotBlank() &&
+                awsPathField.text.isNotBlank()
         generateButton.isEnabled = isValid
     }
 
@@ -244,11 +268,13 @@ class CodeArtifactPanel(private val project: Project) : JPanel() {
                     val domain = domainField.text
                     val profile = profileField.text
                     val region = regionField.text
+                    val awsPath = awsPathField.text
 
                     saveValues()
 
                     val command =
                     runAwsCommand(
+                        awsPath,
                         "codeartifact",
                         "get-authorization-token",
                         "--domain",
@@ -302,6 +328,7 @@ class CodeArtifactPanel(private val project: Project) : JPanel() {
         settings.domain = domainField.text
         settings.profile = profileField.text
         settings.region = regionField.text
+        settings.awsPath = awsPathField.text
     }
 
     private fun loadSavedValues() {
@@ -309,6 +336,7 @@ class CodeArtifactPanel(private val project: Project) : JPanel() {
         domainField.text = settings.domain
         profileField.text = settings.profile
         regionField.text = settings.region
+        awsPathField.text = settings.awsPath
         validateFields()
     }
 }
