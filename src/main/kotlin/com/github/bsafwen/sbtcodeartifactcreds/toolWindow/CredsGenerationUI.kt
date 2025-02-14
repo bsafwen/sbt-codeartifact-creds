@@ -294,6 +294,9 @@ class CodeArtifactPanel(private val project: Project) : JPanel() {
                         credentialsDir.mkdirs()
                     }
 
+                    val credentialsFile = File(credentialsDir, ".credentials")
+                    credentialsFile.writeText(command.second)
+
                     val exitCode = command.first
 
                     SwingUtilities.invokeLater {
