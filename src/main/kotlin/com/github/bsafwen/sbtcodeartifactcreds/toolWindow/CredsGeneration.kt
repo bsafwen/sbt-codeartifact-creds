@@ -17,7 +17,7 @@ import com.intellij.util.ui.UIUtil
 import java.awt.*
 import javax.swing.*
 
-class CredsGenerationUI : ToolWindowFactory {
+class CredsGeneration : ToolWindowFactory {
 
     init {
         thisLogger().warn("Don't forget to remove all non-needed sample code files with their corresponding registration entries in `plugin.xml`.")
@@ -38,6 +38,7 @@ class CodeArtifactPanel(private val project: Project) : JPanel() {
     private val profileField = JBTextField()
     private val regionField = JBTextField()
     private val awsPathField = JBTextField()
+    private val tokenPathField = JBTextField()
     private val generateButton = JButton("Generate Token").apply {
         putClientProperty("JButton.buttonType", "primary")
         icon = AllIcons.Toolwindows.ToolWindowRun
@@ -148,6 +149,18 @@ class CodeArtifactPanel(private val project: Project) : JPanel() {
         inputPanel.add(awsPathLabel, createFieldConstraints(3, 0))
         inputPanel.add(awsPathField, createFieldConstraints(3, 1))
 
+
+        // Token Path field
+        tokenPathField.apply {
+            putClientProperty("JTextField.placeholderText", "Enter the path to save the token")
+            document.addDocumentListener(createValidationListener())
+        }
+        val tokenPathLabel = JBLabel("Token Path:").apply {
+            icon = AllIcons.Ultimate.Lock
+        }
+        inputPanel.add(tokenPathLabel, createFieldConstraints(4, 0))
+        inputPanel.add(tokenPathField, createFieldConstraints(4, 1))
+
         // Add input panel
         gbc.apply {
             gridy = 2
@@ -201,7 +214,7 @@ class CodeArtifactPanel(private val project: Project) : JPanel() {
           <body>
             <p>Note: If you are not logged in, the aws command will prompt you
              to log in</p>
-            <p>The token will be saved to ~/.sbt/.credentials</p>
+            <p>The token will be saved to Token path you provided</p>
             <p>Then you need to need to reference the token in your sbt
              build file:</p>
             <pre>
@@ -211,8 +224,7 @@ class CodeArtifactPanel(private val project: Project) : JPanel() {
       "username",
       sys.env.getOrElse("CODEARTIFACT_AUTH_TOKEN",
        scala.io.Source.fromFile(
-        System.getProperty("user.home") +
-        "/.sbt/.credentials"
+        TOKEN_PATH
        )
       .mkString)
     )
@@ -250,7 +262,8 @@ class CodeArtifactPanel(private val project: Project) : JPanel() {
         val isValid = domainField.text.isNotBlank() &&
                 profileField.text.isNotBlank() &&
                 regionField.text.isNotBlank() &&
-                awsPathField.text.isNotBlank()
+                awsPathField.text.isNotBlank() &&
+                tokenPathField.text.isNotBlank()
         generateButton.isEnabled = isValid
     }
 
@@ -269,32 +282,28 @@ class CodeArtifactPanel(private val project: Project) : JPanel() {
                     val profile = profileField.text
                     val region = regionField.text
                     val awsPath = awsPathField.text
+                    val tokenPath = tokenPathField.text
 
                     saveValues()
 
                     val command =
-                    runAwsCommand(
-                        awsPath,
-                        "codeartifact",
-                        "get-authorization-token",
-                        "--domain",
-                        domain,
-                        "--query",
-                        "authorizationToken",
-                        "--output",
-                        "text",
-                        "--profile",
-                        profile,
-                        "--region",
-                        region
-                    )
+                        runAwsCommand(
+                            awsPath,
+                            "codeartifact",
+                            "get-authorization-token",
+                            "--domain",
+                            domain,
+                            "--query",
+                            "authorizationToken",
+                            "--output",
+                            "text",
+                            "--profile",
+                            profile,
+                            "--region",
+                            region
+                        )
 
-                    val credentialsDir = File(System.getProperty("user.home"), ".sbt")
-                    if (!credentialsDir.exists()) {
-                        credentialsDir.mkdirs()
-                    }
-
-                    val credentialsFile = File(credentialsDir, ".credentials")
+                    val credentialsFile = File(tokenPath)
                     credentialsFile.writeText(command.second)
 
                     val exitCode = command.first
@@ -332,6 +341,7 @@ class CodeArtifactPanel(private val project: Project) : JPanel() {
         settings.profile = profileField.text
         settings.region = regionField.text
         settings.awsPath = awsPathField.text
+        settings.tokenPath = tokenPathField.text
     }
 
     private fun loadSavedValues() {
@@ -340,6 +350,7 @@ class CodeArtifactPanel(private val project: Project) : JPanel() {
         profileField.text = settings.profile
         regionField.text = settings.region
         awsPathField.text = settings.awsPath
+        tokenPathField.text = settings.tokenPath
         validateFields()
     }
 }

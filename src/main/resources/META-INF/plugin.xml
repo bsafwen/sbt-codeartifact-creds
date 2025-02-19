@@ -9,7 +9,7 @@
     <resource-bundle>messages.SbtCodeArtifcatCredentials</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.bsafwen.sbtcodeartifactcreds.toolWindow.CredsGenerationUI" id="CredsGenerationUI"/>
+        <toolWindow factoryClass="com.github.bsafwen.sbtcodeartifactcreds.toolWindow.CredsGeneration" id="CredsGeneration"/>
     </extensions>
 
 </idea-plugin>

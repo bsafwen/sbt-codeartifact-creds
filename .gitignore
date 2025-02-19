@@ -3,3 +3,6 @@
 .intellijPlatform
 .qodana
 build
+.DS_Store
+bin/
+src/.DS_Store

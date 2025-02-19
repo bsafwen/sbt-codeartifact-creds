@@ -7,7 +7,8 @@ data class CodeArtifactSettings(
     var domain: String = "",
     var profile: String = "",
     var region: String = "",
-    var awsPath: String = ""
+    var awsPath: String = "",
+    var tokenPath: String = ""
 )
 
 @Service(Service.Level.PROJECT)
